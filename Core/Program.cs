@@ -3,6 +3,7 @@ using System.IO;
 using Raytracer.Utils;
 
 namespace Raytracer.Core;
+
 class Program 
 {
     public static void Main()
@@ -33,5 +34,14 @@ class Program
             writer.WriteLine();
         }
         Console.WriteLine("\rDone.                           ");
+    }
+
+    public static void WritePixel(in StreamWriter writer, Color pixelColor)
+    {
+        int r = (int)(255 * pixelColor.R());
+        int g = (int)(255 * pixelColor.G());
+        int b = (int)(255 * pixelColor.B());
+
+        writer.Write(r + " " + g + " " + b + "  ");
     }
 }
