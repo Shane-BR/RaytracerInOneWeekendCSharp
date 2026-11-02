@@ -22,17 +22,17 @@ class Vector3(double x, double y, double z)
         return Math.Sqrt(LengthSquared());
     }
 
-    public static Vector3 operator +(in Vector3 a, in Vector3 b)
+    public static Vector3 operator +(Vector3 a, Vector3 b)
     {
         return new Vector3(a.X() + b.X(), a.Y() + b.Y(), a.Z() + b.Z());
     }
 
-    public static Vector3 operator -(in Vector3 a, in Vector3 b)
+    public static Vector3 operator -(Vector3 a, Vector3 b)
     {
         return new Vector3(a.X() - b.X(), a.Y() - b.Y(), a.Z() - b.Z());
     }
 
-    public static Vector3 operator *(in Vector3 a, double scalar)
+    public static Vector3 operator *(Vector3 a, double scalar)
     {
         return new Vector3(a.X()*scalar, a.Y()*scalar, a.Z()*scalar);
     }
@@ -42,12 +42,12 @@ class Vector3(double x, double y, double z)
         return a * scalar;
     }
 
-    public static Vector3 operator /(in Vector3 a, double scalar)
+    public static Vector3 operator /(Vector3 a, double scalar)
     {
         return new Vector3(a.X()/scalar, a.Y()/scalar, a.Z()/scalar);
     }
 
-    public static double Dot(in Vector3 a, in Vector3 b)
+    public static double Dot(Vector3 a, Vector3 b)
     {
         return a.X()*b.X() + a.Y()*b.Y() + a.Z()*b.Z();
     }
@@ -55,7 +55,7 @@ class Vector3(double x, double y, double z)
     /*
         Returns a vector that is perpendicular (orthogonal) to both a and b.
     */
-    public static Vector3 Cross(in Vector3 a, in Vector3 b)
+    public static Vector3 Cross(Vector3 a, Vector3 b)
     {
         return new Vector3(
                             a.Y()*b.Z() - a.Z()*b.Y(),
@@ -63,8 +63,24 @@ class Vector3(double x, double y, double z)
                             a.X()*b.Y() - a.Y()*b.X());
     }
 
-    public static Vector3 UnitVector(in Vector3 a)
+    public static Vector3 UnitVector(Vector3 a)
     {
         return a / a.Length();
+    }
+}
+
+class Ray(Point3 origin, Vector3 direction)
+{
+    private readonly Point3 orig = origin;
+    private readonly Vector3 dir = direction;
+
+    public Point3 Origin()
+    {
+        return orig;
+    }
+
+    public Vector3 Direction()
+    {
+        return dir;
     }
 }

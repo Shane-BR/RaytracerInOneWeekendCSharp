@@ -13,7 +13,7 @@ class Program
         int imageHeight = 500;
         int imageWidth = 500;
 
-        using StreamWriter writer = new(path);
+        StreamWriter writer = new(path);
 
         writer.WriteLine("P3");
         writer.WriteLine("#" + filename);
@@ -25,18 +25,20 @@ class Program
             Console.Write("\rScanlines Remaining: " + (imageHeight-y) + "      ");
             for (int x = 0; x < imageWidth; x++)
             {
-                int r = 255 * y / (imageHeight-1);
-                int g = 0;
-                int b = 255 * x / (imageWidth-1);
+                Color color = new(
+                (double)y / (imageHeight-1),
+                0.0,
+                (double)x / (imageWidth-1));
 
-                writer.Write(r + " " + g + " " + b + "  ");
+                WritePixel(ref writer, color);
             }
             writer.WriteLine();
         }
         Console.WriteLine("\rDone.                           ");
+        writer.Dispose();
     }
 
-    public static void WritePixel(in StreamWriter writer, Color pixelColor)
+    public static void WritePixel(ref StreamWriter writer, Color pixelColor)
     {
         int r = (int)(255 * pixelColor.R());
         int g = (int)(255 * pixelColor.G());
