@@ -70,9 +70,24 @@ class Program
 
     public static Color RayColor(Ray ray)
     {
+        if (HitSphere(new Point3(0, 0, -1), 0.2, ray))
+        {
+            return new Color(1, 0, 0);
+        }
+
         Vector3 unitDir = Vector3.UnitVector(ray.GetDirection());
         double a = 0.5*(unitDir.GetY() + 1.0);
         Color color = (1.0-a) * (new Color(1.0, 1.0, 1.0)) + a*(new Color(0.5, 0.7, 1.0));
         return color;
+    }
+
+    public static bool HitSphere(Point3 center, double radius, Ray ray)
+    {
+        Vector3 oc = center - ray.GetOrigin();
+        double a = Vector3.Dot(ray.GetDirection(), ray.GetDirection());
+        double b = -2.0 * Vector3.Dot(ray.GetDirection(), oc);
+        double c = Vector3.Dot(oc, oc) - radius*radius;
+        double discriminant = b*b - 4*a*c;
+        return discriminant >= 0;
     }
 }
