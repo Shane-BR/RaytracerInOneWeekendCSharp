@@ -4,7 +4,7 @@ namespace Raytracer.Core;
 
 abstract class Hittable
 {
-    public abstract bool Hit(Ray ray, double rayScalarMin, double rayScalarMax, out HitRecord record);
+    public abstract bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord record);
 }
 
 class HitRecord
@@ -16,7 +16,7 @@ class HitRecord
 
     public void SetFaceNormal(Ray ray, Vector3 outwardNormal)
     {
-        frontFace = Vector3.Dot(ray.GetDirection(), outwardNormal) < 0;
+        frontFace = Vector3.Dot(ray.Direction, outwardNormal) < 0;
         normal = frontFace ? outwardNormal : -outwardNormal;
     }
 }
@@ -27,11 +27,11 @@ class Sphere(Point3 _centre, double _radius) : Hittable
     private readonly Point3 centre = _centre;
     private readonly double radius = _radius > 0 ? _radius : 0;
 
-    public override bool Hit(Ray ray, double rayScalarMin, double rayScalarMax, out HitRecord record)
+    public override bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord record)
     {
-        Vector3 oc = centre - ray.GetOrigin();
-        double a = ray.GetDirection().GetLengthSquared(); // Dot(A, A) = |A|^2
-        double h = Vector3.Dot(ray.GetDirection(), oc);
+        Vector3 oc = centre - ray.Origin;
+        double a = ray.Direction.GetLengthSquared(); // Dot(A, A) = |A|^2
+        double h = Vector3.Dot(ray.Direction, oc);
         double c = oc.GetLengthSquared() - radius*radius;
         double discriminant = h*h - a*c;
     
@@ -43,10 +43,10 @@ class Sphere(Point3 _centre, double _radius) : Hittable
         // Find nearest root in given range
         double sqrtd = Math.Sqrt(discriminant);
         double root = (h - sqrtd) / a;
-        if (root <= rayScalarMin || rayScalarMax <= root)
+        if (!rayScalarRange.Surrounds(root))
         {
             root = (h + sqrtd) / a;
-            if (root <= rayScalarMin || rayScalarMax <= root)
+            if (!rayScalarRange.Surrounds(root))
                 return false;
         }
         
@@ -57,7 +57,6 @@ class Sphere(Point3 _centre, double _radius) : Hittable
         return true;
     }
 }
-
 
 class HittableList : Hittable
 {
@@ -73,16 +72,16 @@ class HittableList : Hittable
         objects.Clear();
     }
 
-    public override bool Hit(Ray ray, double rayScalarMin, double rayScalarMax, out HitRecord record)
+    public override bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord record)
     {
         bool hitAnything = false;
-        double closestSoFar = rayScalarMax;
+        double closestSoFar = rayScalarRange.Max;
 
         record = new();
 
         foreach (Hittable obj in objects)
         {
-            if (obj.Hit(ray, rayScalarMin, closestSoFar, out HitRecord temp))
+            if (obj.Hit(ray, new DoubleInterval(rayScalarRange.Min, closestSoFar), out HitRecord temp))
             {
                 hitAnything = true;
                 closestSoFar = temp.scalar;

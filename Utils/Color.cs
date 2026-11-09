@@ -18,23 +18,23 @@ class Color
         elems[2] = b;
     }
 
-    public double R() { return elems[0]; }
-    public double G() { return elems[1]; }
-    public double B() { return elems[2]; }
+    public double R { get {return elems[0];} }
+    public double G { get {return elems[1];} }
+    public double B { get {return elems[2];} }
 
     public static Color operator +(in Color a, in Color b)
     {
-        return new Color(a.R() + b.R(), a.G() + b.G(), a.B() + b.B());
+        return new Color(a.R + b.R, a.G + b.G, a.B + b.B);
     }
 
     public static Color operator -(in Color a, in Color b)
     {
-        return new Color(a.R() - b.R(), a.G() - b.G(), a.B() - b.B());
+        return new Color(a.R - b.R, a.G - b.G, a.B - b.B);
     }
 
     public static Color operator *(in Color a, double scalar)
     {
-        return new Color(a.R()*scalar, a.G()*scalar, a.B()*scalar);
+        return new Color(a.R*scalar, a.G*scalar, a.B*scalar);
     }
 
     public static Color operator *(double scalar, in Color a)
@@ -44,6 +44,6 @@ class Color
 
     public static Color operator /(in Color a, double scalar)
     {
-        return new Color(a.R()/scalar, a.G()/scalar, a.B()/scalar);
+        return new Color(a.R/scalar, a.G/scalar, a.B/scalar);
     }
 }

@@ -66,24 +66,24 @@ class Program
 
     public static void WritePixel(StreamWriter writer, Color pixelColor)
     {
-        int r = (int)(255 * pixelColor.R());
-        int g = (int)(255 * pixelColor.G());
-        int b = (int)(255 * pixelColor.B());
+        int r = (int)(255 * pixelColor.R);
+        int g = (int)(255 * pixelColor.G);
+        int b = (int)(255 * pixelColor.B);
 
         writer.Write(r + " " + g + " " + b + "  ");
     }
 
     public static Color RayColor(Ray ray)
     {
-        if (world.Hit(ray, 0, double.PositiveInfinity, out HitRecord record))
+        if (world.Hit(ray, new DoubleInterval(0, double.PositiveInfinity), out HitRecord record))
         {
-            return (new Color(  0.5*(record.normal.GetX()+1), 
-                                0.5*(record.normal.GetY()+1), 
-                                0.5*(record.normal.GetZ()+1)));
+            return (new Color(  0.5*(record.normal.X+1), 
+                                0.5*(record.normal.Y+1), 
+                                0.5*(record.normal.Z+1)));
         }
 
-        Vector3 unitDir = Vector3.UnitVector(ray.GetDirection());
-        double a = 0.5*(unitDir.GetY() + 1.0);
+        Vector3 unitDir = Vector3.UnitVector(ray.Direction);
+        double a = 0.5*(unitDir.Y + 1.0);
         Color color = (1.0-a) * (new Color(1.0, 1.0, 1.0)) + a*(new Color(0.5, 0.7, 1.0));
         return color;
     }
@@ -91,9 +91,9 @@ class Program
     // Solve for scalar of ray that intersects with sphere
     public static double HitSphere(Point3 center, double radius, Ray ray)
     {
-        Vector3 oc = center - ray.GetOrigin();
-        double a = Vector3.Dot(ray.GetDirection(), ray.GetDirection());
-        double b = -2.0 * Vector3.Dot(ray.GetDirection(), oc);
+        Vector3 oc = center - ray.Origin;
+        double a = Vector3.Dot(ray.Direction, ray.Direction);
+        double b = -2.0 * Vector3.Dot(ray.Direction, oc);
         double c = Vector3.Dot(oc, oc) - radius*radius;
         double discriminant = b*b - 4*a*c;
         
