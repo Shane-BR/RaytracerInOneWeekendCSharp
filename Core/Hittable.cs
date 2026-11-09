@@ -1,55 +1,95 @@
 using Raytracer.Utils;
 
-namespace Raytracer.Core
+namespace Raytracer.Core;
+
+abstract class Hittable
 {
-    abstract class Hittable
+    public abstract bool Hit(Ray ray, double rayScalarMin, double rayScalarMax, out HitRecord record);
+}
+
+class HitRecord
+{
+    public Point3 at = new(0, 0, 0);
+    public Vector3 normal = new(0, 0, 0);
+    public double scalar;
+    public bool frontFace;
+
+    public void SetFaceNormal(Ray ray, Vector3 outwardNormal)
     {
-        public abstract bool Hit(Ray ray, double rayScalarMin, double rayScalarMax, out HitRecord? record);
+        frontFace = Vector3.Dot(ray.GetDirection(), outwardNormal) < 0;
+        normal = frontFace ? outwardNormal : -outwardNormal;
     }
+}
 
-    class HitRecord
+class Sphere(Point3 _centre, double _radius) : Hittable
+{
+
+    private readonly Point3 centre = _centre;
+    private readonly double radius = _radius > 0 ? _radius : 0;
+
+    public override bool Hit(Ray ray, double rayScalarMin, double rayScalarMax, out HitRecord record)
     {
-        public Point3? at;
-        public Vector3? normal;
-        public double scalar;
-    }
+        Vector3 oc = centre - ray.GetOrigin();
+        double a = ray.GetDirection().GetLengthSquared(); // Dot(A, A) = |A|^2
+        double h = Vector3.Dot(ray.GetDirection(), oc);
+        double c = oc.GetLengthSquared() - radius*radius;
+        double discriminant = h*h - a*c;
+    
+        record = new();
 
-    class Sphere(Point3 _centre, double _radius) : Hittable
-    {
+        if (discriminant < 0)
+            return false;
 
-        private readonly Point3 centre = _centre;
-        private readonly double radius = _radius > 0 ? _radius : 0;
-
-        public override bool Hit(Ray ray, double rayScalarMin, double rayScalarMax, out HitRecord? record)
+        // Find nearest root in given range
+        double sqrtd = Math.Sqrt(discriminant);
+        double root = (h - sqrtd) / a;
+        if (root <= rayScalarMin || rayScalarMax <= root)
         {
-            Vector3 oc = centre - ray.GetOrigin();
-            double a = Vector3.Dot(ray.GetDirection(), ray.GetDirection());
-            double h = Vector3.Dot(ray.GetDirection(), oc);
-            double c = oc.GetLengthSquared() - radius*radius; // Dot(A, A) = |A|^2
-            double discriminant = h*h - 4*a*c;
-        
-            record = null;
-
-            if (discriminant < 0)
+            root = (h + sqrtd) / a;
+            if (root <= rayScalarMin || rayScalarMax <= root)
                 return false;
-
-            // Find nearest root in given range
-            double sqrtd = Math.Sqrt(discriminant);
-            double root = (h - sqrtd) / a;
-            if (root <= rayScalarMin || root >= rayScalarMax)
-            {
-                root = (h + sqrtd) / a;
-                if (root <= rayScalarMin || root >= rayScalarMax)
-                    return false;
-            }
-
-            record = new HitRecord();
-            
-            record.scalar = root;
-            record.at = ray.At(record.scalar);
-            record.normal = (record.at - centre) / radius;
-
-            return true;
         }
+        
+        record.scalar = root;
+        record.at = ray.At(record.scalar);
+        record.SetFaceNormal(ray, (record.at - centre) / radius);
+
+        return true;
+    }
+}
+
+
+class HittableList : Hittable
+{
+    private readonly List<Hittable> objects = [];
+
+    public void Add(Hittable obj)
+    {
+        objects.Add(obj);
+    }
+
+    public void Clear()
+    {
+        objects.Clear();
+    }
+
+    public override bool Hit(Ray ray, double rayScalarMin, double rayScalarMax, out HitRecord record)
+    {
+        bool hitAnything = false;
+        double closestSoFar = rayScalarMax;
+
+        record = new();
+
+        foreach (Hittable obj in objects)
+        {
+            if (obj.Hit(ray, rayScalarMin, closestSoFar, out HitRecord temp))
+            {
+                hitAnything = true;
+                closestSoFar = temp.scalar;
+                record = temp;
+            }
+        }
+
+        return hitAnything;
     }
 }

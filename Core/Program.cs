@@ -23,6 +23,8 @@ class Program
     private static readonly Vector3 pixelDeltaX = viewportXDir / imageWidth;
     private static readonly Vector3 pixelDeltaY = viewportYDir / imageHeight;
 
+    private static readonly HittableList world = new();
+
     public static void Main()
     {
         string filename = "output.ppm";
@@ -32,6 +34,9 @@ class Program
                                         - new Vector3(0, 0, cam.GetFocalLength())
                                         - viewportXDir/2 - viewportYDir/2;
         Point3 pixel00Loc = viewportUpperLeft + 0.5 * (pixelDeltaX + pixelDeltaY);
+
+        world.Add(new Sphere(new Point3(0, 0, -1), 0.5));
+        world.Add(new Sphere(new Point3(0, -100.5, -1), 100));
 
         using StreamWriter writer = new(path);
 
@@ -70,23 +75,16 @@ class Program
 
     public static Color RayColor(Ray ray)
     {
-        Point3 sphereCentre = new(0, 0, -1);
-        double scalar = HitSphere(sphereCentre, 0.5, ray);
-        Color color;
-        if (scalar > 0)
+        if (world.Hit(ray, 0, double.PositiveInfinity, out HitRecord record))
         {
-            Point3 hitPoint = ray.At(scalar);
-            Vector3 normal = Vector3.UnitVector(hitPoint - sphereCentre);
-            color = new Color(
-                        (normal.GetX()+1) * 0.5, 
-                        (normal.GetY()+1) * 0.5, 
-                        (normal.GetZ()+1) * 0.5);
-            return color;
+            return (new Color(  0.5*(record.normal.GetX()+1), 
+                                0.5*(record.normal.GetY()+1), 
+                                0.5*(record.normal.GetZ()+1)));
         }
 
         Vector3 unitDir = Vector3.UnitVector(ray.GetDirection());
         double a = 0.5*(unitDir.GetY() + 1.0);
-        color = (1.0-a) * (new Color(1.0, 1.0, 1.0)) + a*(new Color(0.5, 0.7, 1.0));
+        Color color = (1.0-a) * (new Color(1.0, 1.0, 1.0)) + a*(new Color(0.5, 0.7, 1.0));
         return color;
     }
 
@@ -95,9 +93,9 @@ class Program
     {
         Vector3 oc = center - ray.GetOrigin();
         double a = Vector3.Dot(ray.GetDirection(), ray.GetDirection());
-        double h = Vector3.Dot(ray.GetDirection(), oc);
-        double c = oc.GetLengthSquared() - radius*radius; // Dot(A, A) = |A|^2
-        double discriminant = h*h - 4*a*c;
+        double b = -2.0 * Vector3.Dot(ray.GetDirection(), oc);
+        double c = Vector3.Dot(oc, oc) - radius*radius;
+        double discriminant = b*b - 4*a*c;
         
         if (discriminant < 0)
         {
@@ -106,7 +104,7 @@ class Program
         else 
         {
             // For now, return one root
-            return (h - Math.Sqrt(discriminant)) / (2.0 * a);
+            return (-b - Math.Sqrt(discriminant)) / (2.0 * a);
         }
     }
 }
