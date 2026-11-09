@@ -32,6 +32,11 @@ class Vector3(double x, double y, double z)
         return new Vector3(a.GetX() - b.GetX(), a.GetY() - b.GetY(), a.GetZ() - b.GetZ());
     }
 
+    public static Vector3 operator -(Vector3 a)
+    {
+        return new Vector3(-a.GetX(), -a.GetY(), -a.GetZ());
+    }
+
     public static Vector3 operator *(Vector3 a, double scalar)
     {
         return new Vector3(a.GetX()*scalar, a.GetY()*scalar, a.GetZ()*scalar);
