@@ -9,7 +9,7 @@ class Program
 {
 
     public const int imageWidth = 960;
-    public const double aspectRatio = 16/9;
+    public const double aspectRatio = 16.0/9.0;
     public const int imageHeight = 
         ((int)(imageWidth / aspectRatio) < 1) ? 1 : (int)(imageWidth / aspectRatio);
     
@@ -19,9 +19,9 @@ class Program
     public static Camera cam = new();
 
     private static readonly Vector3 viewportXDir = new(viewportWidth, 0, 0);
-    private static readonly Vector3 viewportYDir = new(0, -viewportWidth, 0);
-    private static Vector3 pixelDeltaX = viewportXDir / imageWidth;
-    private static Vector3 pixelDeltaY = viewportYDir / imageHeight;
+    private static readonly Vector3 viewportYDir = new(0, -viewportHeight, 0);
+    private static readonly Vector3 pixelDeltaX = viewportXDir / imageWidth;
+    private static readonly Vector3 pixelDeltaY = viewportYDir / imageHeight;
 
     public static void Main()
     {
@@ -37,7 +37,7 @@ class Program
 
         writer.WriteLine("P3");
         writer.WriteLine("#" + filename);
-        writer.WriteLine(imageHeight + " " + imageWidth);
+        writer.WriteLine(imageWidth + " " + imageHeight);
         writer.WriteLine("255");
         
         for (int y = 0; y < imageHeight; y++)
@@ -70,24 +70,43 @@ class Program
 
     public static Color RayColor(Ray ray)
     {
-        if (HitSphere(new Point3(0, 0, -1), 0.2, ray))
+        Point3 sphereCentre = new(0, 0, -1);
+        double scalar = HitSphere(sphereCentre, 0.5, ray);
+        Color color;
+        if (scalar > 0)
         {
-            return new Color(1, 0, 0);
+            Point3 hitPoint = ray.At(scalar);
+            Vector3 normal = Vector3.UnitVector(hitPoint - sphereCentre);
+            color = new Color(
+                        (normal.GetX()+1) * 0.5, 
+                        (normal.GetY()+1) * 0.5, 
+                        (normal.GetZ()+1) * 0.5);
+            return color;
         }
 
         Vector3 unitDir = Vector3.UnitVector(ray.GetDirection());
         double a = 0.5*(unitDir.GetY() + 1.0);
-        Color color = (1.0-a) * (new Color(1.0, 1.0, 1.0)) + a*(new Color(0.5, 0.7, 1.0));
+        color = (1.0-a) * (new Color(1.0, 1.0, 1.0)) + a*(new Color(0.5, 0.7, 1.0));
         return color;
     }
 
-    public static bool HitSphere(Point3 center, double radius, Ray ray)
+    // Solve for scalar of ray that intersects with sphere
+    public static double HitSphere(Point3 center, double radius, Ray ray)
     {
         Vector3 oc = center - ray.GetOrigin();
         double a = Vector3.Dot(ray.GetDirection(), ray.GetDirection());
-        double b = -2.0 * Vector3.Dot(ray.GetDirection(), oc);
-        double c = Vector3.Dot(oc, oc) - radius*radius;
-        double discriminant = b*b - 4*a*c;
-        return discriminant >= 0;
+        double h = Vector3.Dot(ray.GetDirection(), oc);
+        double c = oc.GetLengthSquared() - radius*radius; // Dot(A, A) = |A|^2
+        double discriminant = h*h - 4*a*c;
+        
+        if (discriminant < 0)
+        {
+            return -1.0;
+        }
+        else 
+        {
+            // For now, return one root
+            return (h - Math.Sqrt(discriminant)) / (2.0 * a);
+        }
     }
 }

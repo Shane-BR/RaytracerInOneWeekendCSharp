@@ -83,4 +83,9 @@ class Ray(Point3 origin, Vector3 direction)
     {
         return dir;
     }
+
+    public Point3 At(double scalar)
+    {
+        return orig + scalar*dir;
+    }
 }
