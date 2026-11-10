@@ -5,9 +5,6 @@ class ImageWriter : IDisposable
     private readonly StreamWriter writer;
     private readonly int imageWidth, imageHeight;
 
-    public int ImageWidth { get{return imageWidth;} }
-    public int ImageHeight { get{return imageHeight;} }
-
     public ImageWriter(string filename, int _imageWidth, int _imageHeight)
     {
         writer = new(filename);

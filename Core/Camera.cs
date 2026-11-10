@@ -4,12 +4,14 @@ namespace Raytracer.Core;
 
 class Camera
 {
-    private Point3 eyePoint = new(0, 0, 0);
-    private double focalLength = 1.0;
-    private readonly int samplesPerPixel = 10;
+    private Point3 centre;
+    private double focalLength;
+    private readonly int samplesPerPixel;
     private readonly double pixelSampleScale;
+    private readonly int imageWidth, imageHeight;
+    private readonly double aspectRatio;
 
-    private readonly double viewportHeight = 2.0;
+    private readonly double viewportHeight;
     private readonly double viewportWidth;
 
     private readonly Vector3 viewportXDir;
@@ -18,10 +20,18 @@ class Camera
     private readonly Vector3 pixelDeltaY;
     private readonly Vector3 pixel00Loc;
 
-    public Camera(int imageWidth, int imageHeight)
+    public Camera(Point3 _centre, int _imageWidth, double _aspectRatio)
     {
+        centre = _centre;
+        focalLength = 1.0;
+        samplesPerPixel = 15;
         pixelSampleScale = 1.0 / samplesPerPixel;
-
+        imageWidth = _imageWidth;
+        aspectRatio = _aspectRatio;
+        imageHeight = 
+            ((int)(imageWidth / aspectRatio) < 1) ? 1 
+            : (int)(imageWidth / aspectRatio);
+        
         viewportHeight = 2.0;
         viewportWidth = viewportHeight * (double)imageWidth/imageHeight;
 
@@ -30,11 +40,14 @@ class Camera
         pixelDeltaX = viewportXDir / imageWidth;
         pixelDeltaY = viewportYDir / imageHeight;
 
-        Vector3 viewportUpperLeft = eyePoint
+        Vector3 viewportUpperLeft = centre
                                         - new Vector3(0, 0, focalLength)
                                         - viewportXDir/2 - viewportYDir/2;
         pixel00Loc = viewportUpperLeft + 0.5 * (pixelDeltaX + pixelDeltaY);
     }
+
+    public int ImageWidth { get{return imageWidth;} }
+    public int ImageHeight { get{return imageHeight;} }
 
     private Color RayColor(Ray ray, Hittable world)
     {
@@ -51,6 +64,10 @@ class Camera
         return color;
     }
 
+    /*
+        I have never looked at other anti-aliasing algorithms, but this seems
+        stupid. Why not use a more deterministic algorithm?
+    */
     private Vector3 RandSampleSquare()
     {
         Random rand = new();
@@ -64,7 +81,7 @@ class Camera
                                 + (x + offset.X) * pixelDeltaX
                                 + (y + offset.Y) * pixelDeltaY;
         
-        Point3 rayOrig = eyePoint;
+        Point3 rayOrig = centre;
         Vector3 rayDir = pixelSample - rayOrig;
 
         return new Ray(rayOrig, rayDir);
@@ -72,8 +89,8 @@ class Camera
 
     public Vector3 EyePoint
     {
-        get { return eyePoint;}
-        set { eyePoint = value;}
+        get { return centre;}
+        set { centre = value;}
     }
 
     public double FocalLength
@@ -84,10 +101,10 @@ class Camera
 
     public void Render(Hittable world, ImageWriter writer)
     {
-        for (int y = 0; y < writer.ImageHeight; y++)
+        for (int y = 0; y < imageHeight; y++)
         {
-            Console.Write("\rScanlines Remaining: " + (writer.ImageHeight-y) + "      ");
-            for (int x = 0; x < writer.ImageWidth; x++)
+            Console.Write("\rScanlines Remaining: " + (imageHeight-y) + "      ");
+            for (int x = 0; x < imageWidth; x++)
             {
                 Color pixelColor = new(0, 0, 0);
                 for (int sample = 0; sample < samplesPerPixel; sample++)
