@@ -28,24 +28,4 @@ class Program
         using ImageWriter writer = new(path, imageWidth, imageHeight);
         cam.Render(world, writer);
     }
-
-    // Solve for scalar of ray that intersects with sphere
-    public static double HitSphere(Point3 center, double radius, Ray ray)
-    {
-        Vector3 oc = center - ray.Origin;
-        double a = Vector3.Dot(ray.Direction, ray.Direction);
-        double b = -2.0 * Vector3.Dot(ray.Direction, oc);
-        double c = Vector3.Dot(oc, oc) - radius*radius;
-        double discriminant = b*b - 4*a*c;
-        
-        if (discriminant < 0)
-        {
-            return -1.0;
-        }
-        else 
-        {
-            // For now, return one root
-            return (-b - Math.Sqrt(discriminant)) / (2.0 * a);
-        }
-    }
 }
