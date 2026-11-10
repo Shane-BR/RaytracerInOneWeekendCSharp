@@ -120,6 +120,13 @@ class DoubleInterval(double _min, double _max)
         return min < x && x < max;
     }
 
+    public double Clamp(double x)
+    {
+        if (x < min) return min;
+        if (x > max) return max;
+        return x;
+    }
+
     public static readonly DoubleInterval Empty = 
         new(double.PositiveInfinity, double.NegativeInfinity);
 

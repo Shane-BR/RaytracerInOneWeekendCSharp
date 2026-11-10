@@ -10,8 +10,12 @@ class Color
     public Color(double r, double g, double b)
     {
         if (r > 1.0 || g > 1.0 || b > 1.0 )
-            throw new ArgumentOutOfRangeException(
-                "Color channels must be within the range [0.0, 1.0].");
+        {
+            DoubleInterval interval = new(0.0, 1.0);
+            r = interval.Clamp(r);
+            g = interval.Clamp(g);
+            b = interval.Clamp(b);
+        }
 
         elems[0] = r;
         elems[1] = g;

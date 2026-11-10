@@ -6,6 +6,8 @@ class Camera
 {
     private Point3 eyePoint = new(0, 0, 0);
     private double focalLength = 1.0;
+    private readonly int samplesPerPixel = 10;
+    private readonly double pixelSampleScale;
 
     private readonly double viewportHeight = 2.0;
     private readonly double viewportWidth;
@@ -18,6 +20,8 @@ class Camera
 
     public Camera(int imageWidth, int imageHeight)
     {
+        pixelSampleScale = 1.0 / samplesPerPixel;
+
         viewportHeight = 2.0;
         viewportWidth = viewportHeight * (double)imageWidth/imageHeight;
 
@@ -47,6 +51,25 @@ class Camera
         return color;
     }
 
+    private Vector3 RandSampleSquare()
+    {
+        Random rand = new();
+        return new Vector3(rand.NextDouble() - 0.5, rand.NextDouble() - 0.5, 0);
+    }
+
+    private Ray GetRay(int x, int y)
+    {
+        Vector3 offset = RandSampleSquare();
+        Point3 pixelSample = pixel00Loc 
+                                + (x + offset.X) * pixelDeltaX
+                                + (y + offset.Y) * pixelDeltaY;
+        
+        Point3 rayOrig = eyePoint;
+        Vector3 rayDir = pixelSample - rayOrig;
+
+        return new Ray(rayOrig, rayDir);
+    }
+
     public Vector3 EyePoint
     {
         get { return eyePoint;}
@@ -66,14 +89,13 @@ class Camera
             Console.Write("\rScanlines Remaining: " + (writer.ImageHeight-y) + "      ");
             for (int x = 0; x < writer.ImageWidth; x++)
             {
-                Point3 pixelCenter = pixel00Loc + (x * pixelDeltaX)
-                                                + (y * pixelDeltaY);
-
-                Vector3 rayDir = pixelCenter - eyePoint;
-                Ray ray = new(eyePoint, rayDir);
-                Color color = RayColor(ray, world);
-
-                writer.WritePixel(x, color);
+                Color pixelColor = new(0, 0, 0);
+                for (int sample = 0; sample < samplesPerPixel; sample++)
+                {
+                    Ray ray = GetRay(x, y);
+                    pixelColor += RayColor(ray, world) * pixelSampleScale;
+                }
+                writer.WritePixel(x, pixelColor);
             }
         }
         Console.WriteLine("\rDone.                           ");
