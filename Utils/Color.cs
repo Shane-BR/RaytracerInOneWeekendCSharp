@@ -26,6 +26,11 @@ class Color
     public double G { get {return elems[1];} }
     public double B { get {return elems[2];} }
 
+    public static Color Black()
+    {
+        return new Color(0, 0, 0);
+    }
+
     public static Color operator +(in Color a, in Color b)
     {
         return new Color(a.R + b.R, a.G + b.G, a.B + b.B);

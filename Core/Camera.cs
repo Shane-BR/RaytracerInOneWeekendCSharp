@@ -10,6 +10,7 @@ class Camera
     private readonly double pixelSampleScale;
     private readonly int imageWidth, imageHeight;
     private readonly double aspectRatio;
+    private readonly int bounceDepth;
 
     private readonly double viewportHeight;
     private readonly double viewportWidth;
@@ -28,6 +29,7 @@ class Camera
         pixelSampleScale = 1.0 / samplesPerPixel;
         imageWidth = _imageWidth;
         aspectRatio = _aspectRatio;
+        bounceDepth = 10;
         imageHeight = 
             ((int)(imageWidth / aspectRatio) < 1) ? 1 
             : (int)(imageWidth / aspectRatio);
@@ -49,13 +51,17 @@ class Camera
     public int ImageWidth { get{return imageWidth;} }
     public int ImageHeight { get{return imageHeight;} }
 
-    private Color RayColor(Ray ray, Hittable world)
+    private Color RayColor(Ray ray, Hittable world, int bDepth)
     {
+        if (bDepth <= 0)
+        {
+            return Color.Black();
+        }
+
         if (world.Hit(ray, new DoubleInterval(0, double.PositiveInfinity), out HitRecord record))
         {
-            return (new Color(  0.5*(record.normal.X+1), 
-                                0.5*(record.normal.Y+1), 
-                                0.5*(record.normal.Z+1)));
+            Vector3 direction = Vector3.RandomOnHemisphere(record.normal);
+            return 0.5 * RayColor(new Ray(record.at, direction), world, bDepth-1);
         }
 
         Vector3 unitDir = Vector3.UnitVector(ray.Direction);
@@ -70,8 +76,7 @@ class Camera
     */
     private Vector3 RandSampleSquare()
     {
-        Random rand = new();
-        return new Vector3(rand.NextDouble() - 0.5, rand.NextDouble() - 0.5, 0);
+        return new Vector3(RandomDouble.Get() - 0.5, RandomDouble.Get() - 0.5, 0);
     }
 
     private Ray GetRay(int x, int y)
@@ -110,7 +115,7 @@ class Camera
                 for (int sample = 0; sample < samplesPerPixel; sample++)
                 {
                     Ray ray = GetRay(x, y);
-                    pixelColor += RayColor(ray, world) * pixelSampleScale;
+                    pixelColor += RayColor(ray, world, bounceDepth) * pixelSampleScale;
                 }
                 writer.WritePixel(x, pixelColor);
             }

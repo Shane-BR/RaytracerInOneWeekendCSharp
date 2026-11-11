@@ -22,6 +22,22 @@ class Vector3(double x, double y, double z)
         return Math.Sqrt(GetLengthSquared());
     }
 
+    public static Vector3 Random()
+    {
+        return new Vector3(
+            RandomDouble.Get(), 
+            RandomDouble.Get(), 
+            RandomDouble.Get());
+    }
+
+    public static Vector3 Random(double min, double max)
+    {
+        return new Vector3(
+            RandomDouble.Get(min, max), 
+            RandomDouble.Get(min, max), 
+            RandomDouble.Get(min, max));
+    }
+
     public static Vector3 operator +(Vector3 a, Vector3 b)
     {
         return new Vector3(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
@@ -71,6 +87,35 @@ class Vector3(double x, double y, double z)
     public static Vector3 UnitVector(Vector3 a)
     {
         return a / a.GetLength();
+    }
+
+    public static Vector3 RandomUnitVector()
+    {
+        while(true) // This raytracing stuff is no joke, huh?
+        {
+            Point3 randPoint = Point3.Random(-1, 1);
+            double lenSqr = randPoint.GetLengthSquared();
+            // Extremely small values of lenSqr may underflow to 0 when squared.
+            // The norm vector will produce a nonsensical result if this happens.
+            // So, exclude these values.
+            if (1e-160 < lenSqr && lenSqr <= 1)
+            {
+                return randPoint / Math.Sqrt(lenSqr);
+            }
+        }
+    }
+
+    public static Vector3 RandomOnHemisphere(Vector3 normal)
+    {
+        Vector3 vec = RandomUnitVector();
+        if (Dot(vec, normal) > 0)
+        {
+            return vec;
+        }
+        else
+        {
+            return -vec;
+        }
     }
 }
 
@@ -132,4 +177,19 @@ class DoubleInterval(double _min, double _max)
 
     public static readonly DoubleInterval universe = 
         new(double.NegativeInfinity, double.PositiveInfinity);
+}
+
+class RandomDouble
+{
+    private static readonly Random rand = new();
+
+    public static double Get()
+    {
+        return rand.NextDouble();
+    }
+
+    public static double Get(double min, double max)
+    {
+        return min + (max - min) * rand.NextDouble();
+    }
 }
