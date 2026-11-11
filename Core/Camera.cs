@@ -58,7 +58,15 @@ class Camera
             return Color.Black();
         }
 
-        if (world.Hit(ray, new DoubleInterval(0, double.PositiveInfinity), out HitRecord record))
+        /* 
+            Floating point imprecision makes it possible that the origin of the bouncing
+            ray is slightly different from the point of intersection with the surface.
+            This may cause the resulting bounce ray to originate from below the surface,
+            and subsequently hit it again at a very close distance.
+            
+            Use 0.001 min distance to avoid hitting the same surface on bounce.
+        */ 
+        if (world.Hit(ray, new DoubleInterval(0.001, double.PositiveInfinity), out HitRecord record))
         {
             Vector3 direction = Vector3.RandomOnHemisphere(record.normal);
             return 0.5 * RayColor(new Ray(record.at, direction), world, bDepth-1);
