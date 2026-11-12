@@ -30,7 +30,7 @@ class Vector3(double x, double y, double z)
                 (Math.Abs(Z) < threshold);
     }
 
-    public static Vector3 Random()
+    private static Vector3 Random()
     {
         return new Vector3(
             RandomDouble.Get(), 
@@ -38,7 +38,7 @@ class Vector3(double x, double y, double z)
             RandomDouble.Get());
     }
 
-    public static Vector3 Random(double min, double max)
+    private static Vector3 Random(double min, double max)
     {
         return new Vector3(
             RandomDouble.Get(min, max), 

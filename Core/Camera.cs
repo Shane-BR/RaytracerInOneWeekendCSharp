@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Raytracer.Utils;
 
 namespace Raytracer.Core;
@@ -25,7 +26,7 @@ class Camera
     {
         centre = _centre;
         focalLength = 1.0;
-        samplesPerPixel = 15;
+        samplesPerPixel = 20;
         pixelSampleScale = 1.0 / samplesPerPixel;
         imageWidth = _imageWidth;
         aspectRatio = _aspectRatio;
@@ -118,9 +119,14 @@ class Camera
 
     public void Render(Hittable world, ImageWriter writer)
     {
+        // Timer
+        Stopwatch stopWatch = new();
+        stopWatch.Start();
+
         for (int y = 0; y < imageHeight; y++)
         {
-            Console.Write("\rScanlines Remaining: " + (imageHeight-y) + "      ");
+            double percentRendered = (int)(((double)y/imageHeight) * 100);
+            Console.Write("\rRendering: " + percentRendered + "%      ");
             for (int x = 0; x < imageWidth; x++)
             {
                 Color pixelColor = new(0, 0, 0);
@@ -132,6 +138,15 @@ class Camera
                 writer.WritePixel(x, pixelColor);
             }
         }
+        stopWatch.Stop();
+        TimeSpan ts = stopWatch.Elapsed;
+
+        string elapsedTime = 
+            String.Format("{0:00}:{1:00}:{2:00}.{3:00}s",
+            ts.Hours, ts.Minutes, ts.Seconds,
+            ts.Milliseconds / 10);        
+        
         Console.WriteLine("\rDone.                           ");
+        Console.WriteLine("Time to Render Scene: " + elapsedTime);
     }
 }

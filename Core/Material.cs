@@ -27,15 +27,17 @@ class Lambertian(Color _albedo) : Material
     }
 }
 
-class Metal(Color _albedo) : Material
+class Metal(Color _albedo, double _fuzz) : Material
 {
     private readonly Color albedo = _albedo;
+    private readonly double fuzz = _fuzz < 1 ? _fuzz : 1;
 
     public override bool Scatter(Ray ray, HitRecord record, out Color attenuation, out Ray scattered)
     {
         Vector3 reflected = Vector3.Reflect(ray.Direction, record.normal);
+        reflected = Vector3.UnitVector(reflected) + (fuzz * Vector3.RandomUnitVector());
         scattered = new Ray(record.at, reflected);
         attenuation = albedo;
-        return true;
+        return Vector3.Dot(scattered.Direction, record.normal) > 0;
     }
 }
