@@ -17,6 +17,16 @@ class ImageWriter : IDisposable
         writer.WriteLine("255");
     }
 
+    private double LinearToGamma(double linearComponent)
+    {
+        if(linearComponent > 0)
+        {
+            return Math.Sqrt(linearComponent);
+        }
+
+        return 0;
+    }
+
     public void Dispose()
     {
         writer.Dispose();
@@ -24,9 +34,9 @@ class ImageWriter : IDisposable
 
     public void WritePixel(int curRowLength, Color pixelColor)
     {
-        int r = (int)(255 * pixelColor.R);
-        int g = (int)(255 * pixelColor.G);
-        int b = (int)(255 * pixelColor.B);
+        int r = (int)(255 * LinearToGamma(pixelColor.R));
+        int g = (int)(255 * LinearToGamma(pixelColor.G));
+        int b = (int)(255 * LinearToGamma(pixelColor.B));
 
         writer.Write(r + " " + g + " " + b + "  ");
 

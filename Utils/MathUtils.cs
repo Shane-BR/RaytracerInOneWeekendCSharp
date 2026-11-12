@@ -22,6 +22,14 @@ class Vector3(double x, double y, double z)
         return Math.Sqrt(GetLengthSquared());
     }
 
+    public bool NearZero()
+    {
+        double threshold = 1e-8;
+        return  (Math.Abs(X) < threshold) && 
+                (Math.Abs(Y) < threshold) && 
+                (Math.Abs(Z) < threshold);
+    }
+
     public static Vector3 Random()
     {
         return new Vector3(
@@ -116,6 +124,12 @@ class Vector3(double x, double y, double z)
         {
             return -vec;
         }
+    }
+
+    public static Vector3 Reflect(Vector3 vec, Vector3 surfaceNormal)
+    {
+        // Reversing 2 times the direction of the projection of vec onto surfaceNormal
+        return vec - 2*Dot(vec,surfaceNormal)*surfaceNormal;
     }
 }
 

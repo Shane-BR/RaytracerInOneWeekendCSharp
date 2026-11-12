@@ -31,27 +31,32 @@ class Color
         return new Color(0, 0, 0);
     }
 
-    public static Color operator +(in Color a, in Color b)
+    public static Color operator +(Color a, Color b)
     {
         return new Color(a.R + b.R, a.G + b.G, a.B + b.B);
     }
 
-    public static Color operator -(in Color a, in Color b)
+    public static Color operator -(Color a, Color b)
     {
         return new Color(a.R - b.R, a.G - b.G, a.B - b.B);
     }
 
-    public static Color operator *(in Color a, double scalar)
+    public static Color operator *(Color a, double scalar)
     {
         return new Color(a.R*scalar, a.G*scalar, a.B*scalar);
     }
 
-    public static Color operator *(double scalar, in Color a)
+    public static Color operator *(double scalar, Color a)
     {
         return a * scalar;
     }
 
-    public static Color operator /(in Color a, double scalar)
+    public static Color operator *(Color a, Color b)
+    {
+        return new Color(a.R * b.R, a.G * b.G, a.B * b.B);
+    }
+
+    public static Color operator /(Color a, double scalar)
     {
         return new Color(a.R/scalar, a.G/scalar, a.B/scalar);
     }

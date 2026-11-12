@@ -68,8 +68,12 @@ class Camera
         */ 
         if (world.Hit(ray, new DoubleInterval(0.001, double.PositiveInfinity), out HitRecord record))
         {
-            Vector3 direction = Vector3.RandomOnHemisphere(record.normal);
-            return 0.5 * RayColor(new Ray(record.at, direction), world, bDepth-1);
+            if (record.material.Scatter(ray, record, out Color attenuation, out Ray scattered))
+            {
+                return attenuation * RayColor(scattered, world, bDepth - 1);
+            }
+
+            return Color.Black();
         }
 
         Vector3 unitDir = Vector3.UnitVector(ray.Direction);
@@ -100,7 +104,7 @@ class Camera
         return new Ray(rayOrig, rayDir);
     }
 
-    public Vector3 EyePoint
+    public Vector3 Centre
     {
         get { return centre;}
         set { centre = value;}

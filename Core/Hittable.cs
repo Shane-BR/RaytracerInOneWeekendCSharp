@@ -11,6 +11,7 @@ class HitRecord
 {
     public Point3 at = new(0, 0, 0);
     public Vector3 normal = new(0, 0, 0);
+    public Material material = new Lambertian(Color.Black());
     public double scalar;
     public bool frontFace;
 
@@ -21,11 +22,12 @@ class HitRecord
     }
 }
 
-class Sphere(Point3 _centre, double _radius) : Hittable
+class Sphere(Point3 _centre, double _radius, Material _material) : Hittable
 {
 
     private readonly Point3 centre = _centre;
     private readonly double radius = _radius > 0 ? _radius : 0;
+    private readonly Material material = _material;
 
     public override bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord record)
     {
@@ -53,6 +55,7 @@ class Sphere(Point3 _centre, double _radius) : Hittable
         record.scalar = root;
         record.at = ray.At(record.scalar);
         record.SetFaceNormal(ray, (record.at - centre) / radius);
+        record.material = material;
 
         return true;
     }
