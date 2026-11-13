@@ -6,40 +6,38 @@ namespace Raytracer.Core;
 class Camera
 {
     private Point3 centre;
-    private double focalLength;
     private readonly int samplesPerPixel;
     private readonly double pixelSampleScale;
     private readonly int imageWidth, imageHeight;
     private readonly double aspectRatio;
+    private readonly double vfov;
     private readonly int bounceDepth;
 
-    private readonly double viewportHeight;
-    private readonly double viewportWidth;
-
-    private readonly Vector3 viewportXDir;
-    private readonly Vector3 viewportYDir;
     private readonly Vector3 pixelDeltaX;
     private readonly Vector3 pixelDeltaY;
     private readonly Vector3 pixel00Loc;
 
-    public Camera(Point3 _centre, int _imageWidth, double _aspectRatio)
+    public Camera(Point3 _centre, int _imageWidth, double _aspectRatio, double _vfov)
     {
         centre = _centre;
-        focalLength = 1.0;
         samplesPerPixel = 20;
         pixelSampleScale = 1.0 / samplesPerPixel;
         imageWidth = _imageWidth;
         aspectRatio = _aspectRatio;
+        vfov = _vfov;
         bounceDepth = 10;
         imageHeight = 
             ((int)(imageWidth / aspectRatio) < 1) ? 1 
             : (int)(imageWidth / aspectRatio);
         
-        viewportHeight = 2.0;
-        viewportWidth = viewportHeight * (double)imageWidth/imageHeight;
+        double focalLength = 1.0;
+        double theta = (Math.PI * vfov) / 180.0;
+        double h = Math.Tan(theta/2);
+        double viewportHeight = 2.0 * h * focalLength;
+        double viewportWidth = viewportHeight * (double)imageWidth/imageHeight;
 
-        viewportXDir = new(viewportWidth, 0, 0);
-        viewportYDir = new(0, -viewportHeight, 0);
+        Vector3 viewportXDir = new(viewportWidth, 0, 0);
+        Vector3 viewportYDir = new(0, -viewportHeight, 0);
         pixelDeltaX = viewportXDir / imageWidth;
         pixelDeltaY = viewportYDir / imageHeight;
 
@@ -109,12 +107,6 @@ class Camera
     {
         get { return centre;}
         set { centre = value;}
-    }
-
-    public double FocalLength
-    {
-        get {return focalLength;}
-        set {focalLength = value;}
     }
 
     public void Render(Hittable world, ImageWriter writer)

@@ -6,7 +6,7 @@ namespace Raytracer.Core;
 
 class Program 
 {
-    public static readonly Camera cam = new(new Point3(0, 0, 0), 480, 16.0/9.0);
+    public static readonly Camera cam = new(new Point3(0, 0, 0), 480, 16.0/9.0, 60);
 
     private static readonly HittableList world = new();
 
