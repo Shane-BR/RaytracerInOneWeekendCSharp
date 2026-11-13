@@ -6,41 +6,42 @@ namespace Raytracer.Core;
 class Camera
 {
     private Point3 centre;
-    private readonly int samplesPerPixel;
     private readonly double pixelSampleScale;
-    private readonly int imageWidth, imageHeight;
-    private readonly double aspectRatio;
-    private readonly double vfov;
-    private readonly int bounceDepth;
+    private readonly int imageHeight;
 
-    private readonly Point3 lookFrom = new(0, 0, 0);
-    private readonly Point3 lookAt = new(0, 0, -1);
     private readonly Vector3 vecUp = new(0, 1, 0);
     private readonly Vector3 basisU, basisV, basisW;
 
     private readonly Vector3 pixelDeltaX;
     private readonly Vector3 pixelDeltaY;
     private readonly Vector3 pixel00Loc;
+    private readonly Vector3 defocusDiskX;
+    private readonly Vector3 defocusDiskY;
 
-    public Camera(Point3 _lookFrom, Point3 _lookAt, int _imageWidth, double _aspectRatio, double _vfov)
+    public int imageWidth = 480;
+    public double aspectRatio = 4/3;
+    public double vfov = 90;
+    public int bounceDepth = 50;
+
+    public int samplesPerPixel = 10;
+
+    public double defocusAngle = 0.5;
+    public double focusDistance = 10.0;
+
+    public Point3 lookFrom = new(0, 0, 0);
+    public Point3 lookAt = new(0, 0, -1);
+
+    public Camera()
     {
-        lookFrom = _lookFrom;
-        lookAt = _lookAt;
         centre = lookFrom;
-        samplesPerPixel = 20;
         pixelSampleScale = 1.0 / samplesPerPixel;
-        imageWidth = _imageWidth;
-        aspectRatio = _aspectRatio;
-        vfov = _vfov;
-        bounceDepth = 10;
         imageHeight = 
             ((int)(imageWidth / aspectRatio) < 1) ? 1 
             : (int)(imageWidth / aspectRatio);
         
-        double focalLength = (lookFrom - lookAt).GetLength();
-        double theta = (Math.PI * vfov) / 180.0;
+        double theta = double.DegreesToRadians(vfov);
         double h = Math.Tan(theta/2);
-        double viewportHeight = 2.0 * h * focalLength;
+        double viewportHeight = 2.0 * h * focusDistance;
         double viewportWidth = viewportHeight * (double)imageWidth/imageHeight;
 
         basisW = Vector3.UnitVector(lookFrom - lookAt);
@@ -53,9 +54,13 @@ class Camera
         pixelDeltaY = viewportYDir / imageHeight;
 
         Vector3 viewportUpperLeft = centre
-                                        - (focalLength * basisW)
+                                        - (focusDistance * basisW)
                                         - viewportXDir/2 - viewportYDir/2;
         pixel00Loc = viewportUpperLeft + 0.5 * (pixelDeltaX + pixelDeltaY);
+
+        double defocusRadius = focusDistance * Math.Tan(Double.DegreesToRadians(defocusAngle/2));
+        defocusDiskX = basisU * defocusRadius;
+        defocusDiskY = basisV * defocusRadius;
     }
 
     public int ImageWidth { get{return imageWidth;} }
@@ -92,6 +97,12 @@ class Camera
         return color;
     }
 
+    private Point3 DefocusDiskSample()
+    {
+        Vector3 v = Vector3.RandomInUnitDisk();
+        return centre + (v.X * defocusDiskX) + (v.Y * defocusDiskY);
+    }
+
     /*
         I have never looked at other anti-aliasing algorithms, but this seems
         stupid. Why not use a more deterministic algorithm?
@@ -108,7 +119,7 @@ class Camera
                                 + (x + offset.X) * pixelDeltaX
                                 + (y + offset.Y) * pixelDeltaY;
         
-        Point3 rayOrig = centre;
+        Point3 rayOrig = (defocusAngle <= 0) ? centre : DefocusDiskSample();
         Vector3 rayDir = pixelSample - rayOrig;
 
         return new Ray(rayOrig, rayDir);

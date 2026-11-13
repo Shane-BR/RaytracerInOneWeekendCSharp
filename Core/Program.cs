@@ -6,11 +6,6 @@ namespace Raytracer.Core;
 
 class Program 
 {
-    public static readonly Camera cam = new(
-            new Point3(-2, 2, 1), 
-            new Point3(0, 0, -1), 
-            480, 16.0/9.0, 90);
-
     private static readonly HittableList world = new();
 
     public static void Main()
@@ -18,17 +13,64 @@ class Program
         string filename = "output.ppm";
         string path = AppContext.BaseDirectory + filename;
 
-        Material ground = new Lambertian(new Color(0.8, 0.8, 0.0));
-        Material metal = new Metal(new Color(0.8, 0.8, 0.8), 0.1);
-        Material ball = new Lambertian(new Color(0.1, 0.2, 0.5));
-        Material glass = new Dielectric(1.50);
-        Material bubble = new Dielectric(1.0 / 1.50);
+        Material groundMat = new Lambertian(new Color(0.5, 0.5, 0.5));
+        world.Add(new Sphere(new Point3(0, -1000, -1), 1000, groundMat));
 
-        world.Add(new Sphere(new Point3(0, 1, -1.2), 0.5, ball));
-        world.Add(new Sphere(new Point3(1.8, 0, -1.4), 0.5, ball));
-        world.Add(new Sphere(new Point3(-1, 0, -1.2), 0.5, glass));
-        world.Add(new Sphere(new Point3(-1, 0, -1.2), 0.4, bubble));
-        world.Add(new Sphere(new Point3(0, -100.5, -1), 100, ground));
+        for (int a = -11; a < 11; a++)
+        {
+            for (int b = -11; b < 11; b++)
+            {
+                double chooseMat = RandomDouble.Get();
+                Point3 centre = new(a + 0.9*RandomDouble.Get(), 0.2, b + 0.9*RandomDouble.Get());
+
+                if ((centre - new Point3(4, 0.2, 0)).GetLength() > 0.9)
+                {
+                    Material sphereMat;
+
+                    if (chooseMat < 0.8)
+                    {
+                        // Diffuse
+                        Color albedo = Color.Random() * Color.Random();
+                        sphereMat = new Lambertian(albedo);
+                    }
+                    else if (chooseMat < 0.95)
+                    {
+                        // Metal
+                        Color albedo = Color.Random(0.5, 1.0);
+                        double fuzz = RandomDouble.Get();
+                        sphereMat = new Metal(albedo, fuzz);
+                    }
+                    else
+                    {
+                        // Glass
+                        sphereMat = new Dielectric(1.5);
+                    }
+                    world.Add(new Sphere(centre, 0.2, sphereMat));
+                }
+            }
+        }
+
+        Material mat1 = new Dielectric(1.5);
+        world.Add(new Sphere(new Point3(0, 1, 0), 1.0, mat1));
+
+        Material mat2 = new Lambertian(new Color(0.4, 0.2, 0.1));
+        world.Add(new Sphere(new Point3(-4, 1, 0), 1.0, mat2));
+
+        Material mat3 = new Metal(new Color(0.7, 0.6, 0.5), 0.0);
+        world.Add(new Sphere(new Point3(4, 1, 0), 1.0, mat3));
+
+        Camera cam = new()
+        {
+            aspectRatio = 16 / 9,
+            imageWidth = 400,
+            samplesPerPixel = 100,
+            bounceDepth = 20,
+            vfov = 50,
+            lookFrom = new Point3(13, 2, 3),
+            lookAt = new Point3(0, 0, 0),
+            defocusAngle = 0.6,
+            focusDistance = 10.0
+        };
 
         using ImageWriter writer = new(path, cam.ImageWidth, cam.ImageHeight);
         cam.Render(world, writer);

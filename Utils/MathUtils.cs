@@ -126,6 +126,16 @@ class Vector3(double x, double y, double z)
         }
     }
 
+    public static Vector3 RandomInUnitDisk()
+    {
+        while (true)
+        {
+            Vector3 v = new(RandomDouble.Get(-1, 1), RandomDouble.Get(-1, 1), 0);
+            if (v.GetLengthSquared() < 1)
+                return v;
+        }
+    }
+
     public static Vector3 Reflect(Vector3 vec, Vector3 surfaceNormal)
     {
         // Reversing 2 times the direction of the projection of vec onto surfaceNormal

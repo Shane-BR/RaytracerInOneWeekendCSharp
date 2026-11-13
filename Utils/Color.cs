@@ -26,6 +26,22 @@ class Color
     public double G { get {return elems[1];} }
     public double B { get {return elems[2];} }
 
+    public static Color Random()
+    {
+        return new Color(RandomDouble.Get(), RandomDouble.Get(), RandomDouble.Get());
+    }
+
+    public static Color Random(double max, double min)
+    {
+        max = Math.Clamp(max, 0, 1);
+        min = Math.Clamp(min, 0, 1);
+
+        return new Color(
+                        RandomDouble.Get(min, max), 
+                        RandomDouble.Get(min, max), 
+                        RandomDouble.Get(min, max));
+    }
+
     public static Color Black()
     {
         return new Color(0, 0, 0);
