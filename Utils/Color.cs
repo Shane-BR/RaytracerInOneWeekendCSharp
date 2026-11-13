@@ -3,9 +3,9 @@ using System;
 
 namespace Raytracer.Utils;
 
-internal readonly struct Color
+internal struct Color
 {
-    private readonly double r, g, b;
+    private double r, g, b;
 
     public Color(double _r, double _g, double _b)
     {
@@ -22,9 +22,16 @@ internal readonly struct Color
         b = _b;
     }
 
-    public double R { get {return r;} }
-    public double G { get {return g;} }
-    public double B { get {return b;} }
+    public readonly double R { get {return r;} }
+    public readonly double G { get {return g;} }
+    public readonly double B { get {return b;} }
+
+    public void SetColor(double _r, double _b, double _g)
+    {
+        r = _r;
+        g = _g;
+        b = _b;
+    }
 
     public static Color Random()
     {

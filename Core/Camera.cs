@@ -86,7 +86,7 @@ class Camera
     public int ImageWidth { get{return imageWidth;} }
     public int ImageHeight { get{return imageHeight;} }
 
-    private Color RayColor(Ray ray, Hittable world, int bDepth)
+    private Color RayColor(Ray ray, Hittable world, int bDepth, HitRecord record)
     {
         if (bDepth <= 0)
         {
@@ -100,13 +100,14 @@ class Camera
             and subsequently hit it again at a very close distance.
             
             Use 0.001 min distance to avoid hitting the same surface on bounce.
-        */ 
-        if (world.Hit(ray, new DoubleInterval(0.001, double.PositiveInfinity), out HitRecord? record))
+        */
+
+        if (world.Hit(ray, new DoubleInterval(0.001, double.PositiveInfinity), record))
         {
-            if (record != null && record.material != null && 
+            if (record.material != null &&
                 record.material.Scatter(ray, record, out Color attenuation, out Ray scattered))
             {
-                return attenuation * RayColor(scattered, world, bDepth - 1);
+                return attenuation * RayColor(scattered, world, bDepth - 1, record);
             }
 
             return Color.Black();
@@ -158,6 +159,8 @@ class Camera
         Stopwatch stopWatch = new();
         stopWatch.Start();
 
+        HitRecord curRecord = new();
+
         for (int y = 0; y < imageHeight; y++)
         {
             Console.Write("\rScanlines Remaining: " + (imageHeight - y) + "      ");
@@ -167,9 +170,9 @@ class Camera
                 for (int sample = 0; sample < samplesPerPixel; sample++)
                 {
                     Ray ray = GetRay(x, y);
-                    pixelColor += RayColor(ray, world, bounceDepth) * pixelSampleScale;
+                    pixelColor += RayColor(ray, world, bounceDepth, curRecord) * pixelSampleScale;
                 }
-                writer.WritePixel(x, pixelColor);
+                writer.WritePixel(pixelColor);
             }
         }
         stopWatch.Stop();

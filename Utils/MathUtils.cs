@@ -173,8 +173,8 @@ internal struct DoubleInterval(double _min, double _max)
     public double Min { get; set; } = _min;
 
     public double Max
-    { 
-        get { return max; }
+    {
+        readonly get { return max; }
         set { max = value; }
     }
 
@@ -203,7 +203,7 @@ internal struct DoubleInterval(double _min, double _max)
     public static readonly DoubleInterval Empty = 
         new(double.PositiveInfinity, double.NegativeInfinity);
 
-    public static readonly DoubleInterval universe = 
+    public static readonly DoubleInterval Universe = 
         new(double.NegativeInfinity, double.PositiveInfinity);
 }
 

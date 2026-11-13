@@ -5,16 +5,42 @@ class ImageWriter : IDisposable
     private readonly StreamWriter writer;
     private readonly int imageWidth, imageHeight;
 
+    private Color[] image;
+    private int imgLen;
+
     public ImageWriter(string filename, int _imageWidth, int _imageHeight)
     {
         writer = new(filename);
         imageWidth = _imageWidth;
         imageHeight = _imageHeight;
 
+        image = new Color[imageWidth * imageHeight];
+        imgLen = 0;
+
         writer.WriteLine("P3");
         writer.WriteLine("#" + filename);
         writer.WriteLine(imageWidth + " " + imageHeight);
         writer.WriteLine("255");
+    }
+
+    private void WriteImage()
+    {
+        for (int y = 0; y < imageHeight; y++)
+        {
+            for (int x = 0; x < imageWidth; x++)
+            {
+                int index = y*imageWidth + x;
+                Color c = image[index];
+
+                int r = (int)(c.R * 255);
+                int g = (int)(c.G * 255);
+                int b = (int)(c.B * 255);
+
+                writer.Write(r + " " + g + " " + b + "  ");
+            }
+
+            writer.WriteLine();
+        }
     }
 
     private double LinearToGamma(double linearComponent)
@@ -29,22 +55,20 @@ class ImageWriter : IDisposable
 
     public void Dispose()
     {
+        WriteImage();
+
         writer.Dispose();
     }
 
-    public void WritePixel(int curRowLength, Color pixelColor)
+    public void WritePixel(Color pixelColor)
     {
-        int r = (int)(255 * LinearToGamma(pixelColor.R));
-        int g = (int)(255 * LinearToGamma(pixelColor.G));
-        int b = (int)(255 * LinearToGamma(pixelColor.B));
+        image[imgLen++] = pixelColor;
 
-        writer.Write(r + " " + g + " " + b + "  ");
-
-        if (curRowLength >= imageWidth)
-        {
-            // Move to next line
-            writer.WriteLine();
-        }
+        // if (curRowLength >= imageWidth)
+        // {
+        //     // Move to next line
+        //     writer.WriteLine();
+        // }
     }
 
 }
