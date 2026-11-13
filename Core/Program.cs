@@ -62,8 +62,8 @@ class Program
         Camera cam = 
         new(
             16.0 / 9.0,
-            400,
-            100,
+            1200,
+            500,
             50,
             20.0,
             new Point3(13, 2, 3),

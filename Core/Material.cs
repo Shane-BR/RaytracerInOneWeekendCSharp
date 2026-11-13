@@ -44,7 +44,7 @@ class Metal(Color _albedo, double _fuzz) : Material
 
 class Dielectric(double _refractionIndex) : Material
 {
-    private double refractionIndex = _refractionIndex;
+    private readonly double refractionIndex = _refractionIndex;
 
     public override bool Scatter(Ray ray, HitRecord record, out Color attenuation, out Ray scattered)
     {

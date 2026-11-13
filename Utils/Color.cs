@@ -3,7 +3,7 @@ using System;
 
 namespace Raytracer.Utils;
 
-class Color
+internal readonly struct Color
 {
     private readonly double[] elems = new double[3];
 

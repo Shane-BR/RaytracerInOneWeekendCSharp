@@ -4,7 +4,7 @@ using System;
 
 namespace Raytracer.Utils;
 
-class Vector3(double x, double y, double z)
+internal readonly struct Vector3(double x, double y, double z)
 {
     private readonly double[] elems = [x, y, z];
 
@@ -151,7 +151,7 @@ class Vector3(double x, double y, double z)
     }
 }
 
-class Ray(Point3 origin, Vector3 direction)
+internal readonly struct Ray(Point3 origin, Vector3 direction)
 {
     private readonly Point3 orig = origin;
     private readonly Vector3 dir = direction;
@@ -166,15 +166,11 @@ class Ray(Point3 origin, Vector3 direction)
     }
 }
 
-class DoubleInterval(double _min, double _max)
+internal struct DoubleInterval(double _min, double _max)
 {
-    private double min = _min, max = _max;
+    private double max = _max;
 
-    public double Min 
-    { 
-        get { return min; }
-        set { min = value; }
-    }
+    public double Min { get; set; } = _min;
 
     public double Max
     { 
@@ -182,24 +178,24 @@ class DoubleInterval(double _min, double _max)
         set { max = value; }
     }
 
-    public double Size()
+    public readonly double Size()
     {
-        return max - min;
+        return max - Min;
     }
 
-    public bool Contains(double x)
+    public readonly bool Contains(double x)
     {
-        return min <= x && x <= max;
+        return Min <= x && x <= max;
     }
 
-    public bool Surrounds(double x)
+    public readonly bool Surrounds(double x)
     {
-        return min < x && x < max;
+        return Min < x && x < max;
     }
 
-    public double Clamp(double x)
+    public readonly double Clamp(double x)
     {
-        if (x < min) return min;
+        if (x < Min) return Min;
         if (x > max) return max;
         return x;
     }
