@@ -13,13 +13,20 @@ class Camera
     private readonly double vfov;
     private readonly int bounceDepth;
 
+    private readonly Point3 lookFrom = new(0, 0, 0);
+    private readonly Point3 lookAt = new(0, 0, -1);
+    private readonly Vector3 vecUp = new(0, 1, 0);
+    private readonly Vector3 basisU, basisV, basisW;
+
     private readonly Vector3 pixelDeltaX;
     private readonly Vector3 pixelDeltaY;
     private readonly Vector3 pixel00Loc;
 
-    public Camera(Point3 _centre, int _imageWidth, double _aspectRatio, double _vfov)
+    public Camera(Point3 _lookFrom, Point3 _lookAt, int _imageWidth, double _aspectRatio, double _vfov)
     {
-        centre = _centre;
+        lookFrom = _lookFrom;
+        lookAt = _lookAt;
+        centre = lookFrom;
         samplesPerPixel = 20;
         pixelSampleScale = 1.0 / samplesPerPixel;
         imageWidth = _imageWidth;
@@ -30,19 +37,23 @@ class Camera
             ((int)(imageWidth / aspectRatio) < 1) ? 1 
             : (int)(imageWidth / aspectRatio);
         
-        double focalLength = 1.0;
+        double focalLength = (lookFrom - lookAt).GetLength();
         double theta = (Math.PI * vfov) / 180.0;
         double h = Math.Tan(theta/2);
         double viewportHeight = 2.0 * h * focalLength;
         double viewportWidth = viewportHeight * (double)imageWidth/imageHeight;
 
-        Vector3 viewportXDir = new(viewportWidth, 0, 0);
-        Vector3 viewportYDir = new(0, -viewportHeight, 0);
+        basisW = Vector3.UnitVector(lookFrom - lookAt);
+        basisU = Vector3.UnitVector(Vector3.Cross(vecUp, basisW));
+        basisV = Vector3.Cross(basisW, basisU);
+
+        Vector3 viewportXDir = viewportWidth * basisU;
+        Vector3 viewportYDir = viewportHeight * -basisV;
         pixelDeltaX = viewportXDir / imageWidth;
         pixelDeltaY = viewportYDir / imageHeight;
 
         Vector3 viewportUpperLeft = centre
-                                        - new Vector3(0, 0, focalLength)
+                                        - (focalLength * basisW)
                                         - viewportXDir/2 - viewportYDir/2;
         pixel00Loc = viewportUpperLeft + 0.5 * (pixelDeltaX + pixelDeltaY);
     }
