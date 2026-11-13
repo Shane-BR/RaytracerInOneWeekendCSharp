@@ -131,6 +131,14 @@ class Vector3(double x, double y, double z)
         // Reversing 2 times the direction of the projection of vec onto surfaceNormal
         return vec - 2*Dot(vec,surfaceNormal)*surfaceNormal;
     }
+
+    public static Vector3 Refract(Vector3 vec, Vector3 surfaceNormal, double etaiOverEtat)
+    {
+        double cosTheta = Math.Min(Dot(-vec, surfaceNormal), 1.0);
+        Vector3 rOutPerp = etaiOverEtat * (vec + cosTheta*surfaceNormal);
+        Vector3 rOutParallel = -Math.Sqrt(Math.Abs(1.0 - rOutPerp.GetLengthSquared())) * surfaceNormal;
+        return rOutPerp + rOutParallel;
+    }
 }
 
 class Ray(Point3 origin, Vector3 direction)

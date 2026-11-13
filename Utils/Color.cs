@@ -31,6 +31,11 @@ class Color
         return new Color(0, 0, 0);
     }
 
+    public static Color White()
+    {
+        return new Color(1, 1, 1);
+    }
+
     public static Color operator +(Color a, Color b)
     {
         return new Color(a.R + b.R, a.G + b.G, a.B + b.B);
