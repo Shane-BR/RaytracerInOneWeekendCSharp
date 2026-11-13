@@ -7,7 +7,11 @@ class Camera
 {
     private Point3 centre;
     private readonly double pixelSampleScale;
+    private readonly int imageWidth;
     private readonly int imageHeight;
+    private readonly double aspectRatio;
+    private readonly double vfov ;
+    private readonly int bounceDepth;
 
     private readonly Vector3 vecUp = new(0, 1, 0);
     private readonly Vector3 basisU, basisV, basisW;
@@ -18,21 +22,37 @@ class Camera
     private readonly Vector3 defocusDiskX;
     private readonly Vector3 defocusDiskY;
 
-    public int imageWidth = 480;
-    public double aspectRatio = 4/3;
-    public double vfov = 90;
-    public int bounceDepth = 50;
+    private readonly int samplesPerPixel;
 
-    public int samplesPerPixel = 10;
+    private readonly double defocusAngle;
+    private readonly double focusDistance;
 
-    public double defocusAngle = 0.5;
-    public double focusDistance = 10.0;
+    private readonly Point3 lookFrom;
+    private readonly Point3 lookAt;
 
-    public Point3 lookFrom = new(0, 0, 0);
-    public Point3 lookAt = new(0, 0, -1);
-
-    public Camera()
+    public Camera
+    (
+        double _aspectRatio,
+        int _imageWidth,
+        int _samplesPerPixel,
+        int _bounceDepth,
+        double _vfov,
+        Point3 _lookFrom,
+        Point3 _lookAt,
+        double _defocusAngle,
+        double _focusDistance
+    )
     {
+        aspectRatio =_aspectRatio;
+        imageWidth = _imageWidth;
+        samplesPerPixel = _samplesPerPixel;
+        bounceDepth = _bounceDepth;
+        vfov = _vfov;
+        lookFrom = _lookFrom;
+        lookAt = _lookAt;
+        defocusAngle = _defocusAngle;
+        focusDistance = _focusDistance;
+
         centre = lookFrom;
         pixelSampleScale = 1.0 / samplesPerPixel;
         imageHeight = 

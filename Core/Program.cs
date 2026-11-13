@@ -59,18 +59,18 @@ class Program
         Material mat3 = new Metal(new Color(0.7, 0.6, 0.5), 0.0);
         world.Add(new Sphere(new Point3(4, 1, 0), 1.0, mat3));
 
-        Camera cam = new()
-        {
-            aspectRatio = 16 / 9,
-            imageWidth = 400,
-            samplesPerPixel = 100,
-            bounceDepth = 20,
-            vfov = 50,
-            lookFrom = new Point3(13, 2, 3),
-            lookAt = new Point3(0, 0, 0),
-            defocusAngle = 0.6,
-            focusDistance = 10.0
-        };
+        Camera cam = 
+        new(
+            16.0 / 9.0,
+            400,
+            100,
+            50,
+            20.0,
+            new Point3(13, 2, 3),
+            new Point3(0, 0, 0),
+            0.6,
+            10.0
+        );
 
         using ImageWriter writer = new(path, cam.ImageWidth, cam.ImageHeight);
         cam.Render(world, writer);
