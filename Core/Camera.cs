@@ -101,9 +101,10 @@ class Camera
             
             Use 0.001 min distance to avoid hitting the same surface on bounce.
         */ 
-        if (world.Hit(ray, new DoubleInterval(0.001, double.PositiveInfinity), out HitRecord record))
+        if (world.Hit(ray, new DoubleInterval(0.001, double.PositiveInfinity), out HitRecord? record))
         {
-            if (record.material.Scatter(ray, record, out Color attenuation, out Ray scattered))
+            if (record != null && record.material != null && 
+                record.material.Scatter(ray, record, out Color attenuation, out Ray scattered))
             {
                 return attenuation * RayColor(scattered, world, bDepth - 1);
             }
@@ -159,8 +160,7 @@ class Camera
 
         for (int y = 0; y < imageHeight; y++)
         {
-            double percentRendered = (int)(((double)y/imageHeight) * 100);
-            Console.Write("\rRendering: " + percentRendered + "%      ");
+            Console.Write("\rScanlines Remaining: " + (imageHeight - y) + "      ");
             for (int x = 0; x < imageWidth; x++)
             {
                 Color pixelColor = new(0, 0, 0);

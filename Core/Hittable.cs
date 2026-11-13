@@ -4,14 +4,14 @@ namespace Raytracer.Core;
 
 abstract class Hittable
 {
-    public abstract bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord record);
+    public abstract bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord? record);
 }
 
 class HitRecord
 {
-    public Point3 at = new(0, 0, 0);
-    public Vector3 normal = new(0, 0, 0);
-    public Material material = new Lambertian(Color.Black());
+    public Point3 at;
+    public Vector3 normal;
+    public Material? material;
     public double scalar;
     public bool frontFace;
 
@@ -29,7 +29,7 @@ class Sphere(Point3 _centre, double _radius, Material _material) : Hittable
     private readonly double radius = _radius > 0 ? _radius : 0;
     private readonly Material material = _material;
 
-    public override bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord record)
+    public override bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord? record)
     {
         Vector3 oc = centre - ray.Origin;
         double a = ray.Direction.GetLengthSquared(); // Dot(A, A) = |A|^2
@@ -37,7 +37,7 @@ class Sphere(Point3 _centre, double _radius, Material _material) : Hittable
         double c = oc.GetLengthSquared() - radius*radius;
         double discriminant = h*h - a*c;
     
-        record = new();
+        record = null;
 
         if (discriminant < 0)
             return false;
@@ -51,6 +51,8 @@ class Sphere(Point3 _centre, double _radius, Material _material) : Hittable
             if (!rayScalarRange.Surrounds(root))
                 return false;
         }
+        
+        record = new();
         
         record.scalar = root;
         record.at = ray.At(record.scalar);
@@ -75,17 +77,20 @@ class HittableList : Hittable
         objects.Clear();
     }
 
-    public override bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord record)
+    public override bool Hit(Ray ray, DoubleInterval rayScalarRange, out HitRecord? record)
     {
         bool hitAnything = false;
         double closestSoFar = rayScalarRange.Max;
 
-        record = new();
+        record = null;
 
         foreach (Hittable obj in objects)
         {
-            if (obj.Hit(ray, new DoubleInterval(rayScalarRange.Min, closestSoFar), out HitRecord temp))
+            if (obj.Hit(ray, new DoubleInterval(rayScalarRange.Min, closestSoFar), out HitRecord? temp))
             {
+                if (temp == null)
+                    continue;
+
                 hitAnything = true;
                 closestSoFar = temp.scalar;
                 record = temp;

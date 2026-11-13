@@ -5,26 +5,26 @@ namespace Raytracer.Utils;
 
 internal readonly struct Color
 {
-    private readonly double[] elems = new double[3];
+    private readonly double r, g, b;
 
-    public Color(double r, double g, double b)
+    public Color(double _r, double _g, double _b)
     {
-        if (r > 1.0 || g > 1.0 || b > 1.0 )
+        if (_r > 1.0 || _g > 1.0 || _b > 1.0 )
         {
             DoubleInterval interval = new(0.0, 1.0);
-            r = interval.Clamp(r);
-            g = interval.Clamp(g);
-            b = interval.Clamp(b);
+            _r = interval.Clamp(_r);
+            _g = interval.Clamp(_g);
+            _b = interval.Clamp(_b);
         }
 
-        elems[0] = r;
-        elems[1] = g;
-        elems[2] = b;
+        r = _r;
+        g = _g;
+        b = _b;
     }
 
-    public double R { get {return elems[0];} }
-    public double G { get {return elems[1];} }
-    public double B { get {return elems[2];} }
+    public double R { get {return r;} }
+    public double G { get {return g;} }
+    public double B { get {return b;} }
 
     public static Color Random()
     {

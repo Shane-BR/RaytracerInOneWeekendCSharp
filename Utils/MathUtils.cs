@@ -4,13 +4,13 @@ using System;
 
 namespace Raytracer.Utils;
 
-internal readonly struct Vector3(double x, double y, double z)
+internal readonly struct Vector3(double _x, double _y, double _z)
 {
-    private readonly double[] elems = [x, y, z];
+    private readonly double x = _x, y = _y, z = _z;
 
-    public double X { get {return elems[0];} }
-    public double Y { get {return elems[1];} }
-    public double Z { get {return elems[2];} }
+    public double X { get {return x;} }
+    public double Y { get {return y;} }
+    public double Z { get {return z;} }
 
     public double GetLengthSquared()
     {
